@@ -53,7 +53,7 @@ def preprocess_tweet(tweet):
     # Remove RT (retweet)
     # TODO: The next line should implement the functionality in the above comment
     '''
-    ^ start anchor
+    \b word border
     '''
     tweet = re.sub(r'\brt\b', '', tweet)
 
