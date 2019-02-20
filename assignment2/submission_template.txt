@@ -6,9 +6,9 @@
         PROBLEM SET 2 SUBMISSION TEMPLATE
 
         Please copy and paste your SQL queries (and potentially Python code
-        for the bonus question) into the appropriate spots below. 
+        for the bonus question) into the appropriate spots below.
 
-        When submitting SQL queries, please do not include the intitial 
+        When submitting SQL queries, please do not include the intitial
         %sql or %%sql IPython commands. Just include the SQL code.
 
         DO NOT DELETE THE <![CDATA[ ... ]]> LINES IN EACH <answer> TAG!
@@ -20,11 +20,11 @@
     <student>
         <name>
             <!-- Insert your full name on the line below. -->
-            
+            Qian Zhang
         </name>
         <sunet>
             <!-- Insert your SUNet ID (NOT your student ID number!) below. -->
-
+            qzhang348
         </sunet>
     </student>
 
@@ -32,30 +32,69 @@
     <!-- BEGIN PROBLEM 1 -->
     <answer number="1a">
         <!-- Paste your solution to problem 1, part (a) below this line. --><![CDATA[
-
-
-
+        SELECT A.i AS "i", B.j AS "j", (A.val*B.val) AS "val"
+        FROM A, B
+        WHERE A.i = B.i AND A.j = B.j
         ]]><!-- End problem 1, part (a). -->
     </answer>
     <answer number="1b">
         <!-- Paste your solution to problem 1, part (b) below this line. --><![CDATA[
-
-
-
+        SELECT Ac.i AS "i", Ac.j AS "j", per.val AS "val"
+        FROM (
+            SELECT *
+            FROM A,c
+            WHERE A.i = c.ind
+            ) AS Ac,
+            (
+            SELECT per.i AS "i", per.j AS "j", A.val AS "val"
+            FROM (SELECT c.pi AS "i", A.j AS "j"
+                  FROM A,c
+                  WHERE A.i = c.ind
+                ) AS per, A
+            WHERE per.i = A.i AND per.j = A.j
+            ) AS per
+        WHERE per.i = Ac.pi AND per.j = Ac.j
         ]]><!-- End problem 1, part (b). -->
     </answer>
     <answer number="1c">
         <!-- Paste your solution to problem 1, part (c) below this line. --><![CDATA[
-
-
-
+        SELECT Ac.i AS "i", Ac.j AS "j", per.val AS "val"
+        FROM (
+            SELECT *
+            FROM A,
+            (
+                SELECT c1.ind AS "ind", c2.pi AS "pi"
+                FROM c AS c1, c AS c2
+                WHERE c1.pi = c2.ind
+            ) AS c
+            WHERE A.i = c.ind
+            ) AS Ac,
+            (
+            SELECT per.i AS "i", per.j AS "j", A.val AS "val"
+            FROM (SELECT c.pi AS "i", A.j AS "j"
+                  FROM A,
+                  (
+                    SELECT c1.ind AS "ind", c2.pi AS "pi"
+                    FROM c AS c1, c AS c2
+                    WHERE c1.pi = c2.ind
+                  ) AS c
+                  WHERE A.i = c.ind
+                ) AS per, A
+            WHERE per.i = A.i AND per.j = A.j
+            ) AS per
+        WHERE per.i = Ac.pi AND per.j = Ac.j
         ]]><!-- End problem 1, part (c). -->
     </answer>
     <answer number="1d">
         <!-- Paste your solution to problem 1, part (d) below this line. --><![CDATA[
-
-
-
+        SELECT a1.i, a1.j, MAX(a2.val) as val
+        FROM A AS a1, A AS a2
+        WHERE (a1.i = a2.i AND a1.j = a2.j)
+            OR (a1.i = a2.i AND a1.j = a2.j-1)
+            OR (a1.i = a2.i AND a1.j = a2.j+1)
+            OR (a1.j = a2.j AND a1.i = a2.i-1)
+            OR (a1.j = a2.j AND a1.i = a2.i+1)
+        GROUP BY a1.i, a1.j
         ]]><!-- End problem 1, part (d). -->
     </answer>
     <!-- END PROBLEM 1 -->
@@ -64,16 +103,27 @@
     <!-- BEGIN PROBLEM 2 -->
     <answer number="2a">
         <!-- Paste your solution to problem 2, part (a) below this line. --><![CDATA[
-
-
-
+        SELECT e.region AS "region", COUNT(e.state) AS num_state_winners
+        FROM energy AS e,
+             (
+                 SELECT MAX(solar) AS maxsloar, MAX(wind) AS maxwind, MAX(hydro) AS maxhydro, MAX(nuclear) AS maxnuclear
+                 FROM energy
+             ) AS rm
+        WHERE e.solar = rm.maxsloar OR e.wind = rm.maxwind OR e.hydro = rm.maxhydro OR e.nuclear = rm.maxnuclear
+        GROUP BY e.region
+        ORDER BY num_state_winners DESC
         ]]><!-- End problem 2, part (a). -->
     </answer>
     <answer number="2b">
         <!-- Paste your solution to problem 2, part (b) below this line. --><![CDATA[
-
-
-
+        SELECT e1.state, e1.solar, e1.wind
+        FROM energy AS e1
+        WHERE NOT EXISTS (
+                SELECT *
+                FROM energy AS e2
+                WHERE (e1.state <> e2.state) AND (e1.solar <= e2.solar) AND (e1.wind <= e2.wind)
+            )
+        ORDER BY (solar+wind) DESC
         ]]><!-- End problem 2, part (b). -->
     </answer>
     <!-- END PROBLEM 2 -->
@@ -82,23 +132,34 @@
     <!-- BEGIN PROBLEM 3 -->
     <answer number="3a">
         <!-- Paste your solution to problem 3, part (a) below this line. --><![CDATA[
-
-
-
+        SELECT X.i, SUM(X.val*w.val) AS "val"
+        FROM X, MODEL AS w
+        WHERE X.j = w.j
+        GROUP BY X.i
+        LIMIT 5
         ]]><!-- End problem 3, part (a). -->
     </answer>
     <answer number="3b">
         <!-- Paste your solution to problem 3, part (b) below this line. --><![CDATA[
-
-
-
+        DROP VIEW IF EXISTS PREDICTION;
+        CREATE VIEW PREDICTION AS
+        SELECT cal.i, CASE WHEN cal.val > 0
+                      THEN 1
+                      ELSE 0
+                      END AS "val"
+        FROM (
+            SELECT X.i, SUM(X.val*w.val) AS "val"
+            FROM X, MODEL AS w
+            WHERE X.j = w.j
+            GROUP BY X.i
+            ) AS cal;
         ]]><!-- End problem 3, part (b). -->
     </answer>
     <answer number="3c">
         <!-- Paste your solution to problem 3, part (c) below this line. --><![CDATA[
-
-
-
+        SELECT COUNT(*)*1.0/(SELECT COUNT(*) FROM IRIS) AS accuracy
+        FROM PREDICTION, IRIS
+        WHERE PREDICTION.i= IRIS.i AND PREDICTION.val = IRIS.Label
         ]]><!-- End problem 3, part (c). -->
     </answer>
     <!-- END PROBLEM 3 -->
@@ -107,9 +168,15 @@
     <!-- BEGIN BONUS -->
     <answer number="bonus1">
         <!-- Paste your solution to bonus problem 1 below this line. --><![CDATA[
-
-
-
+        SELECT w.j as "j", w.val+SUM(nX.val) as 'val'
+        FROM MODEL as w,
+            (
+                SELECT X.i, X.j, (d.Label-p.val)*X.val*0.0001 as "val"
+                FROM PREDICTION as p, IRIS as d, X
+                WHERE p.i = d.i AND p.i = X.i
+            ) AS nX
+        WHERE w.j = nX.j
+        GROUP BY w.j
         ]]><!-- End bonus problem 1. -->
     </answer>
     <!-- END BONUS -->
